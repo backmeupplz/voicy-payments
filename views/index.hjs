@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Voicy payments</title>
+    <link rel="apple-touch-icon" sizes="57x57" href="favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+    <link rel="manifest" href="favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="/javascripts/global.js"></script>
+    <script src="https://checkout.stripe.com/checkout.js"></script>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <img src="/images/logo.png" alt="Voicy" class="center-block">
+    <h1 class="center-block text-center">Chat ID:</h1>
+    <h1 class="center-block text-center">{{ chatId }}</h1>
+    <p class="text-center">{{ seconds }} Google Speech seconds are left in this chat.</p>
+    <p class="text-center">You can buy more Google Speech seconds below.</p>
+    <p class="text-center"><b>{{ rateString }}</b></p>
+    <form>
+      <div class="center">
+        <form class="form-inline" id="buy">
+          <div class="form-group">
+            <input type="hidden" name="chatId" value="{{ chatId }}">
+            <input type="hidden" name="rate" value="{{ rate }}">
+            <input type="number" class="form-control" name="numberOfSeconds" placeholder="Enter number of seconds">
+            <small id="infoLabel" class="form-text text-info"></small>
+            <small id="errorLabel" class="form-text text-danger"></small>
+            <small id="successLabel" class="form-text text-success"></small>
+          </div>
+          <button type="submit" class="btn btn-primary center-block" id="buyButton">Buy</button>
+        </form>
+      </form>
+    </form>
+  </body>
+</html>
