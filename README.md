@@ -5,7 +5,7 @@ This repository contains the code for [voicybot.com](http://voicybot.com) paymen
 
 
 # Continuous integration
-Any commit pushed to master gets deployed to voicybot.com via [CI Ninja](https://github.com/backmeupplz/ci-ninja).
+Any commit pushed to master gets deployed to [voicybot.com](https://voicybot.com) via [CI Ninja](https://github.com/backmeupplz/ci-ninja).
 
 # License
 MIT — use for any purpose. Would be great if you could leave a note about the original developers. Thanks!
