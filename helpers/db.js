@@ -136,51 +136,6 @@ function getNewStats() {
           return;
         }
         result.voiceCount = voiceCount;
-        Chat.aggregate([{ $group: {
-          _id: { $size:"$voices"},
-          count: {$sum: 1}
-        } }, { $sort : { _id : -1} }])
-          .exec((err, voiceStats) => {
-            if (err) {
-              reject(err);
-              return;
-            }
-            
-            let temp = {
-              '0': 0,
-              '1-5': 0,
-              '5-10': 0,
-              '10-50': 0,
-              '50-100': 0,
-              '100-200': 0,
-              '200-500': 0,
-              '500+': 0
-            };
-
-            voiceStats.forEach((obj) => {
-              if (obj._id === 0) {
-                temp['0'] += obj.count;
-              } else if (obj._id >= 1 && obj._id < 5) {
-                temp['1-5'] += obj.count;
-              } else if (obj._id >= 5 && obj._id < 10) {
-                temp['5-10'] += obj.count;
-              } else if (obj._id >= 10 && obj._id < 50) {
-                temp['10-50'] += obj.count;
-              } else if (obj._id >= 50 && obj._id < 100) {
-                temp['50-100'] += obj.count;
-              } else if (obj._id >= 100 && obj._id < 200) {
-                temp['100-200'] += obj.count;
-              } else if (obj._id >= 200 && obj._id < 500) {
-                temp['200-500'] += obj.count;
-              } else if (obj._id >= 500) {
-                temp['500+'] += obj.count;
-              }
-            });
-
-            temp = Object.keys(temp).map(key => ({ _id: key, count: temp[key]}));
-
-            result.voiceStats = temp;
-
             Voice.aggregate([{ $match: {
                 "createdAt" : { 
                    $lt: new Date(), 
@@ -238,7 +193,6 @@ function getNewStats() {
           });
       });
     });
-  });
 }
 
 /** Exports */
