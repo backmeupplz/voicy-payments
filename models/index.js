@@ -10,4 +10,5 @@ module.exports = {
   Chat: require('./chat'),
   Word: require('./word'),
   Stats: require('./stats'),
-};
+  MessageStats: require('./messageStats'),
+}
