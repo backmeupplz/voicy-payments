@@ -192,9 +192,7 @@ function getNewStats() {
           getDuration()
             .then(duration => {
               result.duration = duration
-
-              Chat.aggregate([
-                {},
+              Chat.aggregate(
                 {
                   $project: {
                     _id: '$_id',
@@ -219,8 +217,8 @@ function getNewStats() {
                 {
                   $group: { _id: '$time', count: { $sum: 1 } },
                 },
-                { $sort: { _id: -1 } },
-              ]).exec((err, chatsDailyStats) => {
+                { $sort: { _id: -1 } }
+              ).exec((err, chatsDailyStats) => {
                 if (err) {
                   reject(err)
                   return
