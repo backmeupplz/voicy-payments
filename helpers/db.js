@@ -192,20 +192,55 @@ function getNewStats() {
           getDuration()
             .then(duration => {
               result.duration = duration
-              return Stats.findOne({})
-                .then(stats => {
-                  if (!stats) {
-                    const newStats = new Stats({
-                      json: JSON.stringify(result),
-                    })
-                    return newStats.save()
-                  }
-                  stats.json = JSON.stringify(result)
-                  return stats.save()
-                })
-                .then(() => {
-                  resolve()
-                })
+
+              Chat.aggregate([
+                {},
+                {
+                  $project: {
+                    _id: '$_id',
+                    time: {
+                      $divide: [
+                        {
+                          $subtract: [
+                            { $subtract: [new Date(), '$createdAt'] },
+                            {
+                              $mod: [
+                                { $subtract: [new Date(), '$createdAt'] },
+                                24 * 60 * 60 * 1000,
+                              ],
+                            },
+                          ],
+                        },
+                        24 * 60 * 60 * 1000,
+                      ],
+                    },
+                  },
+                },
+                {
+                  $group: { _id: '$time', count: { $sum: 1 } },
+                },
+                { $sort: { _id: -1 } },
+              ]).exec((err, chatsDailyStats) => {
+                if (err) {
+                  reject(err)
+                  return
+                }
+                result.chatsDailyStats = chatsDailyStats
+                return Stats.findOne({})
+                  .then(stats => {
+                    if (!stats) {
+                      const newStats = new Stats({
+                        json: JSON.stringify(result),
+                      })
+                      return newStats.save()
+                    }
+                    stats.json = JSON.stringify(result)
+                    return stats.save()
+                  })
+                  .then(() => {
+                    resolve()
+                  })
+              })
             })
             .catch(err => reject(err))
         })
