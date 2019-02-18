@@ -128,6 +128,9 @@ function getStats() {
 }
 
 function getNewStats() {
+  // Extra numbers of records that don't exist any more after the cleunup but still contribute to the stats
+  const extraVoiceCount = 16472966
+  const extraDuration = 185936897
   return new Promise((resolve, reject) => {
     const result = {}
     Chat.count({}, (err, chatCount) => {
@@ -141,7 +144,7 @@ function getNewStats() {
           reject(err)
           return
         }
-        result.voiceCount = voiceCount
+        result.voiceCount = voiceCount + extraVoiceCount
         Voice.aggregate([
           {
             $match: {
@@ -191,7 +194,7 @@ function getNewStats() {
           result.hourlyStats = hourlyStats
           getDuration()
             .then(duration => {
-              result.duration = duration
+              result.duration = duration + extraDuration
               Chat.aggregate(
                 {
                   $project: {
