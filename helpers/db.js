@@ -129,8 +129,8 @@ function getStats() {
 
 function getNewStats() {
   // Extra numbers of records that don't exist any more after the cleunup but still contribute to the stats
-  const extraVoiceCount = 16472966
-  const extraDuration = 185936897
+  const extraVoiceCount = 16472966 + 140155
+  const extraDuration = 185936897 + 2245600
   return new Promise((resolve, reject) => {
     const result = {}
     Chat.count({}, (err, chatCount) => {
