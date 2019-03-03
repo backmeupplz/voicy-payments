@@ -1,6 +1,6 @@
 // Dependencies
 const fs = require('fs')
-const readLastLines = require('read-last-lines')
+const readline = require('readline')
 const { Voice, Chat, Word, Stats, MessageStats } = require('../models')
 
 /**
@@ -132,26 +132,7 @@ async function getNewStats() {
   const result = {}
   // Get response stats
   if (fs.existsSync(`${__dirname}/../../voicy/updates.log`)) {
-    const lines = await readLastLines.read(
-      `${__dirname}/../../voicy/updates.log`,
-      250000
-    )
-    const timeReceivedMap = {}
-    for (const line of lines.split('\n')) {
-      if (!line) {
-        continue
-      }
-      const [timeReceived, _, age] = line.replace('s', '').split(' — ')
-      if (timeReceivedMap[timeReceived]) {
-        timeReceivedMap[timeReceived].push(age)
-      } else {
-        timeReceivedMap[timeReceived] = [age]
-      }
-    }
-    for (const key of Object.keys(timeReceivedMap)) {
-      timeReceivedMap[key] = getAvg(timeReceivedMap[key])
-    }
-    result.responseTime = timeReceivedMap
+    result.responseTime = await getAvgResponseTime()
   }
   // Get chats count
   result.chatCount = await Chat.count({})
@@ -257,6 +238,34 @@ function getAvg(numbers) {
       return p + c
     }, 0) / numbers.length
   )
+}
+
+function getAvgResponseTime() {
+  const fileStream = fs.createReadStream(`${__dirname}/../../voicy/updates.log`);
+
+  const rl = readline.createInterface({
+    input: fileStream,
+    crlfDelay: Infinity
+  });
+
+  const timeReceivedMap = {}
+  for await (const line of rl) {
+    if (!line) {
+      continue
+    }
+    const [timeReceived, _, age] = line.replace('s', '').split(' — ')
+    if (timeReceived > Date.now() - 60 * 60 * 24) { // only last 24 hours
+      if (timeReceivedMap[timeReceived]) {
+        timeReceivedMap[timeReceived].push(age)
+      } else {
+        timeReceivedMap[timeReceived] = [age]
+      }
+    }
+  }
+  for (const key of Object.keys(timeReceivedMap)) {
+    timeReceivedMap[key] = getAvg(timeReceivedMap[key])
+  }
+  return timeReceivedMap
 }
 
 /** Exports */
