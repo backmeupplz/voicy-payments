@@ -241,20 +241,21 @@ function getAvg(numbers) {
 }
 
 function getAvgResponseTime() {
-  const fileStream = fs.createReadStream(`${__dirname}/../../voicy/updates.log`);
+  const fileStream = fs.createReadStream(`${__dirname}/../../voicy/updates.log`)
 
   const rl = readline.createInterface({
     input: fileStream,
-    crlfDelay: Infinity
-  });
+    crlfDelay: Infinity,
+  })
 
   const timeReceivedMap = {}
-  for await (const line of rl) {
+  for (const line of rl) {
     if (!line) {
       continue
     }
     const [timeReceived, _, age] = line.replace('s', '').split(' — ')
-    if (timeReceived > Date.now() - 60 * 60 * 24) { // only last 24 hours
+    if (timeReceived > Date.now() - 60 * 60 * 24) {
+      // only last 24 hours
       if (timeReceivedMap[timeReceived]) {
         timeReceivedMap[timeReceived].push(age)
       } else {
