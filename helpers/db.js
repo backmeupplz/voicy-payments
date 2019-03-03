@@ -256,7 +256,7 @@ function getAvgResponseTime() {
         return
       }
       const [timeReceived, _, age] = line.replace('s', '').split(' — ')
-      if (timeReceived > Date.now() - 60 * 60 * 24) {
+      if (timeReceived > Date.now() / 1000 - 60 * 60 * 24) {
         // only last 24 hours
         if (timeReceivedMap[timeReceived]) {
           timeReceivedMap[timeReceived].push(age)
