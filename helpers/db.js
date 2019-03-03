@@ -134,7 +134,7 @@ async function getNewStats() {
   if (fs.existsSync(`${__dirname}/../../voicy/updates.log`)) {
     const lines = await readLastLines.read(
       `${__dirname}/../../voicy/updates.log`,
-      2500000
+      250000
     )
     const timeReceivedMap = {}
     for (const line of lines.split('\n')) {
