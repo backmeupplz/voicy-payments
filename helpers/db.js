@@ -235,7 +235,7 @@ async function getChatDailyStats() {
 function getAvg(numbers) {
   return (
     numbers.reduce(function(p, c) {
-      return p + c
+      return parseInt(p, 10) + parseInt(c, 10)
     }, 0) / numbers.length
   )
 }
@@ -269,6 +269,7 @@ function getAvgResponseTime() {
       for (const key of Object.keys(timeReceivedMap)) {
         timeReceivedMap[key] = getAvg(timeReceivedMap[key])
       }
+      console.log(timeReceivedMap)
       res(timeReceivedMap)
     })
   })
