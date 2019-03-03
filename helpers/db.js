@@ -241,32 +241,40 @@ function getAvg(numbers) {
 }
 
 function getAvgResponseTime() {
-  const fileStream = fs.createReadStream(`${__dirname}/../../voicy/updates.log`)
+  return new Promise((res, rej) => {
+    const fileStream = fs.createReadStream(
+      `${__dirname}/../../voicy/updates.log`
+    )
 
-  const rl = readline.createInterface({
-    input: fileStream,
-    crlfDelay: Infinity,
-  })
-
-  const timeReceivedMap = {}
-  for (const line of rl) {
-    if (!line) {
-      continue
-    }
-    const [timeReceived, _, age] = line.replace('s', '').split(' — ')
-    if (timeReceived > Date.now() - 60 * 60 * 24) {
-      // only last 24 hours
-      if (timeReceivedMap[timeReceived]) {
-        timeReceivedMap[timeReceived].push(age)
-      } else {
-        timeReceivedMap[timeReceived] = [age]
+    const rl = readline.createInterface({
+      input: fileStream,
+      crlfDelay: Infinity,
+    })
+    const timeReceivedMap = {}
+    rl.on('line', line => {
+      if (!line) {
+        return
       }
-    }
-  }
-  for (const key of Object.keys(timeReceivedMap)) {
-    timeReceivedMap[key] = getAvg(timeReceivedMap[key])
-  }
-  return timeReceivedMap
+      const [timeReceived, _, age] = line.replace('s', '').split(' — ')
+      if (timeReceived > Date.now() - 60 * 60 * 24) {
+        // only last 24 hours
+        if (timeReceivedMap[timeReceived]) {
+          timeReceivedMap[timeReceived].push(age)
+        } else {
+          timeReceivedMap[timeReceived] = [age]
+        }
+      }
+    })
+    rl.on('end', () => {
+      for (const key of Object.keys(timeReceivedMap)) {
+        timeReceivedMap[key] = getAvg(timeReceivedMap[key])
+      }
+      res(timeReceivedMap)
+    })
+    rl.on('error', err => {
+      rej(err)
+    })
+  })
 }
 
 /** Exports */
