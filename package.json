@@ -33,6 +33,7 @@
     "mpath": "^0.4.1",
     "mpromise": "^0.5.5",
     "node-telegram-bot-api": "^0.24.0",
+    "read-last-lines": "^1.6.0",
     "regexp-clone": "0.0.1",
     "require_optional": "^1.0.1",
     "safe-buffer": "^5.1.2",

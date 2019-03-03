@@ -1,9 +1,6 @@
-/**
- * @module db
- * @license MIT
- */
-
-/** Get schemas **/
+// Dependencies
+const fs = require('fs')
+const readLastLines = require('read-last-lines')
 const { Voice, Chat, Word, Stats, MessageStats } = require('../models')
 
 /**
@@ -127,127 +124,139 @@ function getStats() {
   })
 }
 
-function getNewStats() {
+async function getNewStats() {
   // Extra numbers of records that don't exist any more after the cleunup but still contribute to the stats
   const extraVoiceCount = 16472966 + 140155
   const extraDuration = 185936897 + 2245600
-  return new Promise((resolve, reject) => {
-    const result = {}
-    Chat.count({}, (err, chatCount) => {
-      if (err) {
-        reject(err)
-        return
+  // Get result dummy variable
+  const result = {}
+  // Get response stats
+  if (fs.existsSync(`${__dirname}/../../voicy/updates.log`)) {
+    const lines = await readLastLines.read(
+      `${__dirname}/../../voicy/updates.log`,
+      2500000
+    )
+    const timeReceivedMap = {}
+    for (const line of lines.split('\n')) {
+      if (!line) {
+        continue
       }
-      result.chatCount = chatCount
-      Voice.count({}, (err, voiceCount) => {
-        if (err) {
-          reject(err)
-          return
-        }
-        result.voiceCount = voiceCount + extraVoiceCount
-        Voice.aggregate([
-          {
-            $match: {
-              createdAt: {
-                $lt: new Date(),
-                $gte: new Date(new Date().setDate(new Date().getDate() - 30)),
-              },
-            },
-          },
-          {
-            $project: {
-              _id: '$_id',
-              time: {
-                $divide: [
-                  {
-                    $subtract: [
-                      { $subtract: [new Date(), '$createdAt'] },
-                      {
-                        $mod: [
-                          { $subtract: [new Date(), '$createdAt'] },
-                          24 * 60 * 60 * 1000,
-                        ],
-                      },
-                    ],
-                  },
-                  24 * 60 * 60 * 1000,
-                ],
-              },
-            },
-          },
-          {
-            $group: { _id: '$time', count: { $sum: 1 } },
-          },
-          { $sort: { _id: -1 } },
-        ]).exec((err, hourlyStats) => {
-          if (err) {
-            reject(err)
-            return
-          }
-          const temp = hourlyStats.map(v => v._id)
-          for (var i = 0; i <= 29; i++) {
-            if (!temp.includes(i)) {
-              hourlyStats.push({ _id: i, count: 0 })
-            }
-          }
-          hourlyStats.sort((a, b) => a._id - b._id)
-          result.hourlyStats = hourlyStats
-          getDuration()
-            .then(duration => {
-              result.duration = duration + extraDuration
-              Chat.aggregate(
-                {
-                  $project: {
-                    _id: '$_id',
-                    time: {
-                      $divide: [
-                        {
-                          $subtract: [
-                            { $subtract: [new Date(), '$createdAt'] },
-                            {
-                              $mod: [
-                                { $subtract: [new Date(), '$createdAt'] },
-                                24 * 60 * 60 * 1000,
-                              ],
-                            },
-                          ],
-                        },
-                        24 * 60 * 60 * 1000,
-                      ],
-                    },
-                  },
-                },
-                {
-                  $group: { _id: '$time', count: { $sum: 1 } },
-                },
-                { $sort: { _id: -1 } }
-              ).exec((err, chatsDailyStats) => {
-                if (err) {
-                  reject(err)
-                  return
-                }
-                result.chatsDailyStats = chatsDailyStats
-                return Stats.findOne({})
-                  .then(stats => {
-                    if (!stats) {
-                      const newStats = new Stats({
-                        json: JSON.stringify(result),
-                      })
-                      return newStats.save()
-                    }
-                    stats.json = JSON.stringify(result)
-                    return stats.save()
-                  })
-                  .then(() => {
-                    resolve()
-                  })
-              })
-            })
-            .catch(err => reject(err))
-        })
-      })
+      const [timeReceived, _, age] = line.replace('s', '').split(' — ')
+      if (timeReceivedMap[timeReceived]) {
+        timeReceivedMap[timeReceived].push(age)
+      } else {
+        timeReceivedMap[timeReceived] = [age]
+      }
+    }
+    for (const key of Object.keys(timeReceivedMap)) {
+      timeReceivedMap[key] = getAvg(timeReceivedMap[key])
+    }
+    result.responseTime = timeReceivedMap
+  }
+  // Get chats count
+  result.chatCount = await Chat.count({})
+  // Get voice count
+  result.voiceCount = (await Voice.count({})) + extraVoiceCount
+  // Get houtly stats
+  const hourlyStats = await getHourlyStats()
+  const temp = hourlyStats.map(v => v._id)
+  for (var i = 0; i <= 29; i++) {
+    if (!temp.includes(i)) {
+      hourlyStats.push({ _id: i, count: 0 })
+    }
+  }
+  hourlyStats.sort((a, b) => a._id - b._id)
+  result.hourlyStats = hourlyStats
+  // Get duration
+  result.duration = (await getDuration()) + extraDuration
+  // Get chat daily stats
+  result.chatDailyStats = await getChatDailyStats()
+  // Overwrite stats
+  const stats = await Stats.findOne({})
+  if (!stats) {
+    const newStats = new Stats({
+      json: JSON.stringify(result),
     })
-  })
+    return newStats.save()
+  }
+  stats.json = JSON.stringify(result)
+  return stats.save()
+}
+
+async function getHourlyStats() {
+  return Voice.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $lt: new Date(),
+          $gte: new Date(new Date().setDate(new Date().getDate() - 30)),
+        },
+      },
+    },
+    {
+      $project: {
+        _id: '$_id',
+        time: {
+          $divide: [
+            {
+              $subtract: [
+                { $subtract: [new Date(), '$createdAt'] },
+                {
+                  $mod: [
+                    { $subtract: [new Date(), '$createdAt'] },
+                    24 * 60 * 60 * 1000,
+                  ],
+                },
+              ],
+            },
+            24 * 60 * 60 * 1000,
+          ],
+        },
+      },
+    },
+    {
+      $group: { _id: '$time', count: { $sum: 1 } },
+    },
+    { $sort: { _id: -1 } },
+  ])
+}
+
+async function getChatDailyStats() {
+  return Chat.aggregate(
+    {
+      $project: {
+        _id: '$_id',
+        time: {
+          $divide: [
+            {
+              $subtract: [
+                { $subtract: [new Date(), '$createdAt'] },
+                {
+                  $mod: [
+                    { $subtract: [new Date(), '$createdAt'] },
+                    24 * 60 * 60 * 1000,
+                  ],
+                },
+              ],
+            },
+            24 * 60 * 60 * 1000,
+          ],
+        },
+      },
+    },
+    {
+      $group: { _id: '$time', count: { $sum: 1 } },
+    },
+    { $sort: { _id: -1 } }
+  )
+}
+
+function getAvg(numbers) {
+  return (
+    numbers.reduce(function(p, c) {
+      return p + c
+    }, 0) / numbers.length
+  )
 }
 
 /** Exports */
