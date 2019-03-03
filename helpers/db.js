@@ -265,14 +265,11 @@ function getAvgResponseTime() {
         }
       }
     })
-    rl.on('end', () => {
+    rl.on('close', () => {
       for (const key of Object.keys(timeReceivedMap)) {
         timeReceivedMap[key] = getAvg(timeReceivedMap[key])
       }
       res(timeReceivedMap)
-    })
-    rl.on('error', err => {
-      rej(err)
     })
   })
 }
