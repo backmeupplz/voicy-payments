@@ -147,7 +147,7 @@ async function getNewStats() {
     }
   }
   hourlyStats.sort((a, b) => a._id - b._id)
-  result.hourlyStats = hourlyStats
+  result.hourlyStats = hourlyStats.reverse()
   // Get duration
   result.duration = (await getDuration()) + extraDuration
   // Get chat daily stats
