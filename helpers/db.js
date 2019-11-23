@@ -116,7 +116,7 @@ function getStats() {
       .then(stats => {
         MessageStats.find().then(messageStats => {
           const json = JSON.parse(stats.json)
-          json.messageStats = messageStats
+          json.messageStats = messageStats.filter(stat => stat.count > 50000)
           resolve(json)
         })
       })
