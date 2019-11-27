@@ -14,9 +14,13 @@ router.get('/statsfornikita', (req, res, next) => {
 })
 
 router.get('/statsforashmanov', async (req, res, next) => {
-  const voiceCount = await Voice.countDocuments({ engine: 'ashmanov' })
-  const chatCount = await Chat.countDocuments({ engine: 'ashmanov' })
-  res.json({ voiceCount, chatCount })
+  try {
+    const voiceCount = await Voice.count({ engine: 'ashmanov' })
+    const chatCount = await Chat.count({ engine: 'ashmanov' })
+    res.json({ voiceCount, chatCount })
+  } catch (err) {
+    res.json({ status: 'error' })
+  }
 })
 
 module.exports = router
