@@ -125,6 +125,7 @@ function getStats() {
 }
 
 async function getNewStats() {
+  console.log('getting stats')
   // Extra numbers of records that don't exist any more after the cleunup but still contribute to the stats
   const extraVoiceCount = 16472966 + 140155 + 10228067
   const extraDuration = 185936897 + 2245600 + 147045183
