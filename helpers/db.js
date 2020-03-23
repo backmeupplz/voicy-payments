@@ -161,6 +161,7 @@ async function getNewStats() {
     return newStats.save()
   }
   stats.json = JSON.stringify(result)
+  console.log('got new stats')
   return stats.save()
 }
 
