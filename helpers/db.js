@@ -139,7 +139,7 @@ async function getNewStats() {
   // Get voice count
   result.voiceCount = (await Voice.count({})) + extraVoiceCount
   // Get houtly stats
-  const hourlyStats = await getHourlyStats().filter(s => !!s.count)
+  const hourlyStats = (await getHourlyStats()).filter(s => !!s.count)
   const temp = hourlyStats.map(v => v._id)
   for (var i = 0; i <= 29; i++) {
     if (!temp.includes(i)) {
