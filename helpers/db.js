@@ -57,14 +57,14 @@ function generateWordCount() {
     console.log('start generating word count')
     let words = {}
 
-    const cursor = Voice.find({}).then(voices => {
-      voices.forEach(voice => {
+    const cursor = Voice.find({}).then((voices) => {
+      voices.forEach((voice) => {
         if (voice.text && voice.text.length > 3) {
           voice.text
             .toLowerCase()
             .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '')
             .split(' ')
-            .forEach(word => {
+            .forEach((word) => {
               if (word.length > 3) {
                 if (words[word]) {
                   words[word] += 1
@@ -77,7 +77,7 @@ function generateWordCount() {
       })
       let ops = []
 
-      Object.keys(words).forEach(k => {
+      Object.keys(words).forEach((k) => {
         const p = new Promise((res, rej) => {
           const newWord = new Word({ word: String(k), count: words[k] })
           newWord
@@ -85,7 +85,7 @@ function generateWordCount() {
             .then(() => {
               res()
             })
-            .catch(err => {
+            .catch((err) => {
               rej(err)
             })
         })
@@ -97,7 +97,7 @@ function generateWordCount() {
           const end = new Date() - start
           console.info('word count generated in: %dms', end)
         })
-        .catch(err => {
+        .catch((err) => {
           console.log(`word count generation failed: ${err.message}`)
         })
     })
@@ -105,30 +105,28 @@ function generateWordCount() {
 }
 
 function getWordCount() {
-  return Word.find({})
-    .sort({ count: -1 })
-    .limit(20)
+  return Word.find({}).sort({ count: -1 }).limit(20)
 }
 
 function getStats() {
   return new Promise((resolve, reject) => {
     Stats.findOne()
-      .then(stats => {
-        MessageStats.find().then(messageStats => {
+      .then((stats) => {
+        MessageStats.find().then((messageStats) => {
           const json = JSON.parse(stats.json)
-          json.messageStats = messageStats.filter(stat => stat.count > 50000)
+          json.messageStats = messageStats.filter((stat) => stat.count > 50000)
           resolve(json)
         })
       })
-      .catch(err => reject(err))
+      .catch((err) => reject(err))
   })
 }
 
 async function getNewStats() {
   console.log('getting stats')
   // Extra numbers of records that don't exist any more after the cleunup but still contribute to the stats
-  const extraVoiceCount = 16472966 + 140155 + 10228067
-  const extraDuration = 185936897 + 2245600 + 147045183
+  const extraVoiceCount = 16472966 + 140155 + 10228067 + 24327202
+  const extraDuration = 185936897 + 2245600 + 147045183 + 344688480
   // Get result dummy variable
   const result = {}
   // Get response stats
@@ -140,8 +138,8 @@ async function getNewStats() {
   // Get voice count
   result.voiceCount = (await Voice.count({})) + extraVoiceCount
   // Get houtly stats
-  const hourlyStats = (await getHourlyStats()).filter(s => !!s.count)
-  const temp = hourlyStats.map(v => v._id)
+  const hourlyStats = (await getHourlyStats()).filter((s) => !!s.count)
+  const temp = hourlyStats.map((v) => v._id)
   for (var i = 0; i <= 29; i++) {
     if (!temp.includes(i)) {
       hourlyStats.push({ _id: i, count: 0 })
@@ -236,7 +234,7 @@ async function getChatDailyStats() {
 
 function getAvg(numbers) {
   return (
-    numbers.reduce(function(p, c) {
+    numbers.reduce(function (p, c) {
       return parseInt(p, 10) + parseInt(c, 10)
     }, 0) / numbers.length
   )
@@ -253,7 +251,7 @@ function getAvgResponseTime() {
       crlfDelay: Infinity,
     })
     const timeReceivedMap = {}
-    rl.on('line', line => {
+    rl.on('line', (line) => {
       if (!line) {
         return
       }
