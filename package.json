@@ -25,7 +25,7 @@
     "json-stringify-safe": "^5.0.1",
     "jsprim": "^2.0.0",
     "kareem": "^2.2.1",
-    "lodash": "^4.17.19",
+    "lodash": "^4.17.21",
     "lodash.isplainobject": "^4.0.6",
     "media-typer": "^0.3.0",
     "mongoose": "^4.7.1",
