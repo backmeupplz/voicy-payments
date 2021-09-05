@@ -30,7 +30,7 @@
     "media-typer": "^0.3.0",
     "mongoose": "^4.7.1",
     "morgan": "~1.6.1",
-    "mpath": "^0.4.1",
+    "mpath": "^0.8.4",
     "mpromise": "^0.5.5",
     "node-telegram-bot-api": "^0.24.0",
     "regexp-clone": "0.0.1",
