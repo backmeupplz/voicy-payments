@@ -1,0 +1,8 @@
+[phases.install]
+cmds = ["npm install"]
+
+[start]
+cmd = "node ./bin/www"
+
+[variables]
+NODE_ENV = "production"
