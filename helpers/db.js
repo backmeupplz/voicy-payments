@@ -44,7 +44,7 @@ function getDuration() {
         if (err) {
           reject(err)
         } else {
-          resolve(parseInt(result[0].duration, 10))
+          resolve(parseInt(result[0]?.duration || '0', 10))
         }
       }
     )
@@ -125,8 +125,16 @@ function getStats() {
 async function getNewStats() {
   console.log('getting stats')
   // Extra numbers of records that don't exist anymore after the cleanup but still contribute to the stats
-  const extraVoiceCount = 16472966 + 140155 + 10228067 + 24327202 + 23724547 + 48066867
-  const extraDuration = 185936897 + 2245600 + 147045183 + 344688480 + 7780507 + 352478725 + 297266368
+  const extraVoiceCount =
+    16472966 + 140155 + 10228067 + 24327202 + 23724547 + 48066867
+  const extraDuration =
+    185936897 +
+    2245600 +
+    147045183 +
+    344688480 +
+    7780507 +
+    352478725 +
+    297266368
   // Get result dummy variable
   const result = {}
   // Get response stats
