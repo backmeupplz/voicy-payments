@@ -17,7 +17,7 @@ function findChats(query) {
 
 function countChats() {
   return new Promise((resolve, reject) => {
-    return Chat.count({}, (err, count) => {
+    return Chat.estimatedDocumentCount((err, count) => {
       if (err) {
         reject(err)
       } else {
@@ -34,12 +34,14 @@ function findVoices(query) {
 function getDuration() {
   return new Promise((resolve, reject) => {
     Voice.aggregate(
-      {
-        $group: {
-          _id: '',
-          duration: { $sum: '$duration' },
+      [
+        {
+          $group: {
+            _id: '',
+            duration: { $sum: '$duration' },
+          },
         },
-      },
+      ],
       (err, result) => {
         if (err) {
           reject(err)
@@ -53,7 +55,7 @@ function getDuration() {
 
 function generateWordCount() {
   const start = new Date()
-  Word.remove({}, () => {
+  Word.deleteMany({}, () => {
     console.log('start generating word count')
     let words = {}
 
@@ -142,9 +144,9 @@ async function getNewStats() {
     result.responseTime = await getAvgResponseTime()
   }
   // Get chats count
-  result.chatCount = await Chat.count({})
+  result.chatCount = await Chat.estimatedDocumentCount()
   // Get voice count
-  result.voiceCount = (await Voice.count({})) + extraVoiceCount
+  result.voiceCount = (await Voice.estimatedDocumentCount()) + extraVoiceCount
   // Get houtly stats
   const hourlyStats = (await getHourlyStats()).filter((s) => !!s.count)
   const temp = hourlyStats.map((v) => v._id)
@@ -211,7 +213,7 @@ async function getHourlyStats() {
 }
 
 async function getChatDailyStats() {
-  return Chat.aggregate(
+  return Chat.aggregate([
     {
       $project: {
         _id: '$_id',
@@ -236,8 +238,8 @@ async function getChatDailyStats() {
     {
       $group: { _id: '$time', count: { $sum: 1 } },
     },
-    { $sort: { _id: -1 } }
-  )
+    { $sort: { _id: -1 } },
+  ])
 }
 
 function getAvg(numbers) {
