@@ -1,0 +1,32 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [master]
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  check:
+    # Our own PRs and pushes run on the Mac runners; outsiders' PRs (AGit via the github bot) on Linux
+    runs-on: ${{ (github.event_name != 'pull_request' || contains(fromJSON('["backmeupplz","renovate","claude"]'), github.event.pull_request.user.login)) && 'macos-latest' || 'ubuntu-latest' }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      # Production's Node major (.nvmrc); the Mac runners keep their tool cache, so this is a cache hit there
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      # Linux caches node_modules (a hit skips the install); on the Mac npm's global cache persists
+      - id: modules
+        if: runner.os == 'Linux'
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: modules-${{ runner.os }}-${{ hashFiles('package-lock.json', '.nvmrc') }}
+      - if: steps.modules.outputs.cache-hit != 'true'
+        run: npm ci --no-audit --no-fund
+      # Plain JavaScript with no build or linter: syntax-check every tracked script
+      - run: git ls-files -z '*.js' bin/www | xargs -0 -n1 node --check
