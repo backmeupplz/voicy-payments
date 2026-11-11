@@ -28,7 +28,7 @@
     "lodash": "^4.17.23",
     "lodash.isplainobject": "^4.0.6",
     "media-typer": "^0.3.0",
-    "mongoose": "^6.13.10",
+    "mongoose": "^6.13.12",
     "morgan": "^1.10.0",
     "mpath": "^0.8.4",
     "mpromise": "^0.5.5",
